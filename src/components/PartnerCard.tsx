@@ -130,35 +130,46 @@ export function PartnerCard() {
     <div className={styles.stack}>
       <section className={styles.panel}>
         <div className={styles.profileHead}>
-          <div className={styles.avatar} aria-hidden>
-            {getInitials(partner.fullName)}
-          </div>
-          <div className={styles.profileMain}>
-            <h2 className={styles.profileName}>
-              {partner.fullName ?? 'ФИО не указано'}
-            </h2>
-            <div className={styles.profileMeta}>
-              <span className={styles.chip}>№ {partner.partnerNumber}</span>
-              {level != null ? (
-                <span className={`${styles.chip} ${styles.chipAccent}`}>
-                  Уровень {level} от корня
-                </span>
-              ) : null}
-              {statusDecoded?.matches.map((item) => (
-                <span
-                  key={item.code}
-                  className={styles.chip}
-                  title={`${item.title}: ${item.description}`}
-                >
-                  {item.code === '+' ? '(+)' : `(${item.code})`} {item.title}
-                </span>
-              ))}
-              {statusDecoded && statusDecoded.matches.length === 0 && partner.status ? (
-                <span className={styles.chip}>{partner.status}</span>
-              ) : null}
+          <div className={styles.profileTop}>
+            <div className={styles.avatar} aria-hidden>
+              {getInitials(partner.fullName)}
+            </div>
+            <div className={styles.profileMain}>
+              <h2 className={styles.profileName}>
+                {partner.fullName ?? 'ФИО не указано'}
+              </h2>
+              <div className={styles.profileMeta}>
+                <span className={styles.chip}>№ {partner.partnerNumber}</span>
+                {level != null ? (
+                  <span className={`${styles.chip} ${styles.chipAccent}`}>
+                    Ур. {level}
+                  </span>
+                ) : null}
+                {statusDecoded?.matches.map((item) => (
+                  <span
+                    key={item.code}
+                    className={styles.chip}
+                    title={`${item.title}: ${item.description}`}
+                  >
+                    {item.code === '+' ? '(+)' : `(${item.code})`}
+                  </span>
+                ))}
+                {statusDecoded &&
+                statusDecoded.matches.length === 0 &&
+                partner.status ? (
+                  <span className={styles.chip}>{partner.status}</span>
+                ) : null}
+              </div>
             </div>
           </div>
-          <div className={styles.profileActions}>
+          <div
+            className={styles.profileActions}
+            style={{
+              gridTemplateColumns: sponsor
+                ? 'repeat(3, minmax(0, 1fr))'
+                : 'repeat(2, minmax(0, 1fr))',
+            }}
+          >
             <button type="button" className={styles.btn} onClick={goBack}>
               <ArrowLeft size={16} strokeWidth={2} />
               Назад
@@ -169,16 +180,16 @@ export function PartnerCard() {
               onClick={() => void onCopy(partner.partnerNumber, 'Номер')}
             >
               <Copy size={16} strokeWidth={2} />
-              Копировать номер
+              Номер
             </button>
             {sponsor ? (
               <button
                 type="button"
-                className={styles.btnSoft}
+                className={styles.btn}
                 onClick={() => selectPartner(sponsor.partnerNumber, 'card')}
               >
                 <UserRound size={16} strokeWidth={2} />
-                К спонсору
+                Спонсор
               </button>
             ) : null}
           </div>

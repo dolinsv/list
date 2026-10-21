@@ -87,9 +87,8 @@
 .topHeader {
   grid-area: header;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-3);
   padding: var(--space-4) var(--space-6);
   border-bottom: 1px solid var(--line);
   background: var(--surface);
@@ -98,8 +97,16 @@
   z-index: 20;
 }
 
+.headerTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 .headerTitleBlock {
   min-width: 0;
+  flex: 1;
 }
 
 .headerTitle {
@@ -107,27 +114,89 @@
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.headerSubtitle {
+  margin: 0.2rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.headerDot {
+  margin: 0 0.35rem;
+  color: var(--ink-faint);
 }
 
 .headerMeta {
-  margin-top: 0.25rem;
-  color: var(--ink-muted);
-  font-size: 0.84rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.85rem;
+  gap: 0.4rem;
 }
 
-.headerMetaItem strong {
+.metaPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
   color: var(--ink-secondary);
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .headerActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  flex: 0 0 auto;
+}
+
+.headerBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.4rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.headerBtn:hover {
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+.headerBtnDanger {
+  border-color: transparent;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.headerBtnDanger:hover {
+  background: var(--danger-soft);
+}
+
+.toolbarGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: var(--space-3);
+}
+
+.toolbarGrid .btn {
+  width: 100%;
+  min-height: 2.5rem;
+  font-size: 0.82rem;
+  padding: 0.5rem 0.55rem;
 }
 
 .main {
@@ -154,9 +223,12 @@
   gap: 0.4rem;
   border-radius: var(--radius-sm);
   padding: 0.55rem 0.9rem;
+  min-height: 2.5rem;
   border: 1px solid transparent;
   transition: background var(--ease), border-color var(--ease), color var(--ease);
   white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .btn {
@@ -830,9 +902,14 @@
 /* Partner profile */
 .profileHead {
   display: flex;
+  flex-direction: column;
   gap: var(--space-4);
+}
+
+.profileTop {
+  display: flex;
+  gap: var(--space-3);
   align-items: flex-start;
-  flex-wrap: wrap;
 }
 
 .avatar {
@@ -872,10 +949,18 @@
 }
 
 .profileActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-left: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.profileActions .btn {
+  width: 100%;
+  min-width: 0;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 0.82rem;
 }
 
 .contactList {
@@ -1039,16 +1124,31 @@
 
 .treeNode {
   border-left: 2px solid var(--line-strong);
-  margin-left: 0.55rem;
-  padding-left: 0.7rem;
+  margin-left: 0.35rem;
+  padding-left: 0.55rem;
 }
 
 .treeRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-2);
-  padding: 0.3rem 0;
+  padding: 0.4rem 0;
+}
+
+.treeContent {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.treeMeta {
+  display: flex;
   flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  align-items: center;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
 }
 
 .treeToggle {
@@ -1247,16 +1347,18 @@
     background: var(--surface);
     border-top: 1px solid var(--line);
     z-index: 25;
-    padding: 0.35rem;
+    padding: 0.4rem 0.35rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
     gap: 0.15rem;
   }
 
   .mobileNav .navItem {
     flex-direction: column;
     gap: 0.2rem;
-    font-size: 0.7rem;
-    padding: 0.45rem 0.25rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.5rem 0.2rem;
     text-align: center;
+    min-height: 3.1rem;
   }
 
   .mobileNav .navItemActive {
@@ -1272,12 +1374,30 @@
 
   .main {
     padding: var(--space-4);
+    padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
     max-width: none;
   }
 
   .topHeader {
-    padding: var(--space-4);
-    flex-direction: column;
+    padding: 0.85rem 1rem;
+    gap: 0.65rem;
+  }
+
+  .headerTitle {
+    font-size: 1.1rem;
+  }
+
+  .headerActions {
+    width: auto;
+    min-width: 9.5rem;
+  }
+
+  .headerBtn span {
+    font-size: 0.78rem;
+  }
+
+  .toolbarGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .actionsGrid {
@@ -1291,11 +1411,22 @@
   .filtersRow {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 560px) {
-  .statsGrid {
-    grid-template-columns: 1fr 1fr;
+  .stack {
+    gap: var(--space-3);
+  }
+
+  .panel {
+    padding: var(--space-4);
+  }
+
+  .sectionTitle {
+    font-size: 1.15rem;
+  }
+
+  .sectionLead {
+    margin-bottom: var(--space-3);
+    font-size: 0.9rem;
   }
 }
 
@@ -1308,11 +1439,6 @@
     display: grid;
   }
 
-  .profileActions {
-    margin-left: 0;
-    width: 100%;
-  }
-
   .directItem {
     grid-template-columns: 1fr;
   }
@@ -1323,5 +1449,40 @@
 
   .levelRow {
     grid-template-columns: 4.5rem 1fr 2rem;
+  }
+
+  .profileName {
+    font-size: 1.2rem;
+  }
+
+  .metricValue {
+    font-size: 1.4rem;
+  }
+
+  .input,
+  .select {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .headerBtn span {
+    display: none;
+  }
+
+  .headerActions {
+    min-width: auto;
+    grid-template-columns: repeat(2, 2.5rem);
+  }
+
+  .headerBtn {
+    padding: 0;
+    width: 2.5rem;
+    min-height: 2.5rem;
   }
 }

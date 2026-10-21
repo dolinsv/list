@@ -56,13 +56,6 @@ export function PartnerSearch() {
 
   return (
     <section className={styles.stack}>
-      <div>
-        <p className={styles.sectionLead} style={{ marginBottom: 0 }}>
-          Найдите человека по номеру или ФИО. Поиск выполняется только в памяти
-          браузера.
-        </p>
-      </div>
-
       <div className={styles.panel}>
         <div className={styles.filtersRow}>
           <div className={styles.field}>

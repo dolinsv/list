@@ -1,5 +1,12 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronRight, Home, RefreshCw, Search } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  Home,
+  List,
+  Network,
+  Search,
+} from 'lucide-react';
 import styles from '../styles/app.module.css';
 import { useSession } from '../context/SessionContext';
 import {
@@ -46,19 +53,23 @@ function TreeBranch({
             ·
           </span>
         )}
-        <button
-          type="button"
-          className={styles.linkBtn}
-          onClick={() => onOpen(node.partnerNumber)}
-        >
-          {node.partner.fullName ?? node.partnerNumber}
-        </button>
-        <span className={styles.nameSecondary}>{node.partnerNumber}</span>
-        <span className={styles.chip}>ур. {node.level}</span>
-        <span className={styles.muted}>
-          ББ {formatNumber(node.partner.personalBB)} · ПГ{' '}
-          {formatNumber(node.partner.groupBB)}
-        </span>
+        <div className={styles.treeContent}>
+          <button
+            type="button"
+            className={styles.linkBtn}
+            onClick={() => onOpen(node.partnerNumber)}
+          >
+            {node.partner.fullName ?? node.partnerNumber}
+          </button>
+          <div className={styles.treeMeta}>
+            <span>{node.partnerNumber}</span>
+            <span className={styles.chip}>ур. {node.level}</span>
+            <span>
+              ББ {formatNumber(node.partner.personalBB)} · ПГ{' '}
+              {formatNumber(node.partner.groupBB)}
+            </span>
+          </div>
+        </div>
       </div>
       {hasChildren && isOpen
         ? node.children.map((child) => (
@@ -82,7 +93,6 @@ export function StructureTree() {
     hasSponsorField,
     selectPartner,
     setStructureSearch,
-    changeRoot,
   } = useSession();
   const rootNumber = state.rootPartnerNumber;
   const [expanded, setExpanded] = useState<Set<string>>(
@@ -113,11 +123,6 @@ export function StructureTree() {
         <div className={`${styles.alert} ${styles.alertWarn}`}>
           {tree?.message ??
             'Нельзя построить дерево: нет достоверного поля спонсора или связей.'}
-        </div>
-        <div className={styles.row} style={{ marginTop: 12 }}>
-          <button type="button" className={styles.btn} onClick={changeRoot}>
-            Выбрать другой корень
-          </button>
         </div>
       </section>
     );
@@ -150,26 +155,13 @@ export function StructureTree() {
   return (
     <div className={styles.stack}>
       <section className={styles.panel}>
-        <p className={styles.sectionLead} style={{ marginBottom: '0.75rem' }}>
-          Корень:{' '}
-          <strong>
-            {formatPartnerLabel(rootPartner.partnerNumber, rootPartner.fullName)}
-          </strong>
-        </p>
         <div className={styles.treeStats}>
-          <span className={styles.chip}>
-            В структуре: {tree.nodeCount}
-          </span>
-          <span className={styles.chip}>
-            Непосредственных: {directs.length}
-          </span>
-          <span className={styles.chip}>Макс. уровень: {tree.maxLevel}</span>
-          {tree.truncatedCycles > 0 ? (
-            <span className={styles.chip}>Обрывы циклов: {tree.truncatedCycles}</span>
-          ) : null}
+          <span className={styles.chip}>Всего {tree.nodeCount}</span>
+          <span className={styles.chip}>Прямых {directs.length}</span>
+          <span className={styles.chip}>Глубина {tree.maxLevel}</span>
         </div>
 
-        <div className={styles.field} style={{ marginBottom: 12 }}>
+        <div className={styles.field}>
           <label htmlFor="structure-search">Поиск в структуре</label>
           <div className={styles.searchField}>
             <Search size={16} strokeWidth={2} aria-hidden />
@@ -185,7 +177,7 @@ export function StructureTree() {
         </div>
 
         {searchHits.length > 0 ? (
-          <ul className={styles.list} style={{ marginBottom: 12 }}>
+          <ul className={styles.list}>
             {searchHits.map((hit) => (
               <li key={hit.partnerNumber}>
                 <button
@@ -195,15 +187,16 @@ export function StructureTree() {
                 >
                   {formatPartnerLabel(hit.partnerNumber, hit.partner.fullName)}
                 </button>
-                <span className={styles.muted}> · уровень {hit.level}</span>
+                <span className={styles.muted}> · ур. {hit.level}</span>
               </li>
             ))}
           </ul>
         ) : null}
 
-        <div className={styles.row}>
+        <div className={styles.toolbarGrid}>
           <button type="button" className={styles.btn} onClick={expandFirstLevel}>
-            Раскрыть 1-й уровень
+            <Network size={15} strokeWidth={2} />
+            1-й уровень
           </button>
           <button type="button" className={styles.btn} onClick={collapseToRoot}>
             <Home size={15} strokeWidth={2} />
@@ -214,16 +207,16 @@ export function StructureTree() {
             className={styles.btn}
             onClick={() => setCompact((v) => !v)}
           >
-            {compact ? 'Показать дерево' : 'Компактный список'}
-          </button>
-          <button type="button" className={styles.btnGhost} onClick={changeRoot}>
-            <RefreshCw size={15} strokeWidth={2} />
-            Другой корень
+            <List size={15} strokeWidth={2} />
+            {compact ? 'Дерево' : 'Список'}
           </button>
         </div>
       </section>
 
       <section className={styles.panel}>
+        <p className={styles.muted} style={{ marginTop: 0, marginBottom: 12 }}>
+          Корень: {formatPartnerLabel(rootPartner.partnerNumber, rootPartner.fullName)}
+        </p>
         {compact ? (
           <div className={styles.directList}>
             {tree.root.children.map((child) => (
@@ -238,7 +231,7 @@ export function StructureTree() {
                     {child.partner.fullName ?? 'Без ФИО'}
                   </span>
                   <span className={styles.nameSecondary}>
-                    {child.partnerNumber} · вниз {child.children.length}
+                    {child.partnerNumber} · ниже {child.children.length}
                   </span>
                 </div>
                 <div className={styles.directStats}>

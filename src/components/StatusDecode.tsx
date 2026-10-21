@@ -65,7 +65,10 @@ export function StatusDecode({ status }: Props) {
             Справочник меток Oriflame
           </div>
           <ul className={styles.statusList}>
-            {STATUS_GLOSSARY.map((item) => (
+            {STATUS_GLOSSARY.filter(
+              (item, index, all) =>
+                all.findIndex((x) => x.title === item.title) === index,
+            ).map((item) => (
               <li key={item.code} className={styles.statusItem}>
                 <span className={styles.chip}>
                   {item.code === '+' ? '(+)' : `(${item.code})`}

@@ -5,7 +5,6 @@ import {
   UserRound,
   RefreshCw,
   Eraser,
-  FolderOpen,
 } from 'lucide-react';
 import styles from '../styles/app.module.css';
 import { SessionProvider, useSession } from '../context/SessionContext';
@@ -34,8 +33,8 @@ const TABS: Array<{
 const TAB_TITLES: Record<DashboardTab, string> = {
   overview: 'Моя структура',
   partners: 'Партнёры',
-  structure: 'Структура команды',
-  card: 'Карточка партнёра',
+  structure: 'Структура',
+  card: 'Карточка',
 };
 
 function Dashboard() {
@@ -43,10 +42,6 @@ function Dashboard() {
   const root = state.rootPartnerNumber
     ? index?.byNumber.get(state.rootPartnerNumber)
     : null;
-
-  const replaceFile = () => {
-    clearData();
-  };
 
   return (
     <div className={styles.dashboard}>
@@ -76,44 +71,52 @@ function Dashboard() {
       </aside>
 
       <header className={styles.topHeader}>
-        <div className={styles.headerTitleBlock}>
-          <h1 className={styles.headerTitle}>{TAB_TITLES[state.tab]}</h1>
-          <div className={styles.headerMeta}>
+        <div className={styles.headerTopRow}>
+          <div className={styles.headerTitleBlock}>
+            <h1 className={styles.headerTitle}>{TAB_TITLES[state.tab]}</h1>
             {root ? (
-              <span className={styles.headerMetaItem}>
-                Корень:{' '}
-                <strong>
-                  {root.partnerNumber}
-                  {root.fullName ? ` · ${root.fullName}` : ''}
-                </strong>
-              </span>
+              <p className={styles.headerSubtitle}>
+                {root.fullName ?? root.partnerNumber}
+                <span className={styles.headerDot}>·</span>
+                {root.partnerNumber}
+              </p>
             ) : null}
+          </div>
+          <div className={styles.headerActions}>
+            <button
+              type="button"
+              className={styles.headerBtn}
+              onClick={changeRoot}
+              title="Сменить корень анализа"
+            >
+              <RefreshCw size={16} strokeWidth={2} />
+              <span>Корень</span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.headerBtn} ${styles.headerBtnDanger}`}
+              onClick={clearData}
+              title="Очистить данные и загрузить другой файл"
+            >
+              <Eraser size={16} strokeWidth={2} />
+              <span>Сброс</span>
+            </button>
+          </div>
+        </div>
+        {(state.report?.catalogLabel || state.report?.reportDate) && (
+          <div className={styles.headerMeta}>
             {state.report?.catalogLabel ? (
-              <span className={styles.headerMetaItem}>
-                Каталог: <strong>{state.report.catalogLabel}</strong>
+              <span className={styles.metaPill}>
+                Каталог {state.report.catalogLabel}
               </span>
             ) : null}
             {state.report?.reportDate ? (
-              <span className={styles.headerMetaItem}>
-                Отчёт: <strong>{state.report.reportDate}</strong>
+              <span className={styles.metaPill}>
+                Отчёт {state.report.reportDate}
               </span>
             ) : null}
           </div>
-        </div>
-        <div className={styles.headerActions}>
-          <button type="button" className={styles.btnGhost} onClick={changeRoot}>
-            <RefreshCw size={16} strokeWidth={2} />
-            Сменить корень
-          </button>
-          <button type="button" className={styles.btn} onClick={replaceFile}>
-            <FolderOpen size={16} strokeWidth={2} />
-            Другой файл
-          </button>
-          <button type="button" className={styles.btnDanger} onClick={clearData}>
-            <Eraser size={16} strokeWidth={2} />
-            Очистить
-          </button>
-        </div>
+        )}
       </header>
 
       <main className={styles.main}>

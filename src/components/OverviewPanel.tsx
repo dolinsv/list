@@ -78,12 +78,8 @@ export function OverviewPanel() {
   return (
     <div className={styles.stack}>
       <section>
-        <h2 className={styles.sectionTitle}>Моя структура</h2>
-        <p className={styles.sectionLead}>
-          Краткая картина вашей команды по загруженному отчёту.
-        </p>
-        <p className={styles.muted} style={{ marginTop: '-0.75rem' }}>
-          Корень анализа:{' '}
+        <p className={styles.sectionLead} style={{ marginBottom: 0 }}>
+          Краткая картина команды ·{' '}
           <strong>
             {formatPartnerLabel(rootNumber, metrics.root?.fullName ?? null)}
           </strong>
