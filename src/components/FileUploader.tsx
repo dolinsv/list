@@ -59,7 +59,7 @@ export function FileUploader() {
         <Upload
           size={28}
           strokeWidth={1.75}
-          style={{ color: 'var(--accent)', marginBottom: 12 }}
+          style={{ color: 'var(--ink-muted)', marginBottom: 12 }}
         />
         <p className={styles.sectionLead} style={{ margin: '0 auto 0.5rem' }}>
           Перетащите файл сюда или выберите на устройстве

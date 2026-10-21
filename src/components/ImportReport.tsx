@@ -8,6 +8,15 @@ export function ImportReport() {
 
   const { validation } = report;
 
+  const stats = [
+    { label: 'Строк', value: validation.rowCount },
+    { label: 'Партнёров', value: validation.partnerCount },
+    { label: 'Уникальных номеров', value: validation.uniqueNumbers },
+    { label: 'Пропуски полей', value: validation.missingKeyFields },
+    { label: 'Дубликаты номеров', value: validation.duplicateNumbers },
+    { label: 'Колонок распознано', value: validation.mappedColumns.length },
+  ];
+
   return (
     <section className={styles.panel}>
       <h2 className={styles.sectionTitle}>Проверка отчёта</h2>
@@ -16,43 +25,28 @@ export function ImportReport() {
         распознана верно.
       </p>
 
-      <div className={styles.metricsGrid} style={{ marginBottom: 20 }}>
-        <article className={styles.metricCard}>
-          <div className={styles.metricLabel}>Файл</div>
-          <div className={styles.metricValue} style={{ fontSize: '1rem' }}>
-            {validation.fileName}
-          </div>
-        </article>
-        <article className={styles.metricCard}>
-          <div className={styles.metricLabel}>Строк</div>
-          <div className={styles.metricValue}>{validation.rowCount}</div>
-        </article>
-        <article className={styles.metricCard}>
-          <div className={styles.metricLabel}>Партнёров</div>
-          <div className={styles.metricValue}>{validation.partnerCount}</div>
-        </article>
-        <article className={styles.metricCard}>
-          <div className={styles.metricLabel}>Уникальных номеров</div>
-          <div className={styles.metricValue}>{validation.uniqueNumbers}</div>
-        </article>
-        <article className={styles.metricCard}>
-          <div className={styles.metricLabel}>Пропуски полей</div>
-          <div className={styles.metricValue}>{validation.missingKeyFields}</div>
-        </article>
-        <article className={styles.metricCard}>
-          <div className={styles.metricLabel}>Дубликаты номеров</div>
-          <div className={styles.metricValue}>{validation.duplicateNumbers}</div>
-        </article>
+      <div className={styles.fileBanner}>
+        <span className={styles.fileBannerLabel}>Файл</span>
+        <span className={styles.fileBannerName}>{validation.fileName}</span>
+        {(report.catalogLabel || report.reportDate) && (
+          <span className={styles.muted} style={{ marginTop: 4 }}>
+            {report.catalogLabel ? `Каталог ${report.catalogLabel}` : ''}
+            {report.catalogLabel && report.reportDate ? ' · ' : ''}
+            {report.reportDate ? `отчёт ${report.reportDate}` : ''}
+          </span>
+        )}
       </div>
 
-      {(report.catalogLabel || report.reportDate) && (
-        <p className={styles.muted}>
-          {report.catalogLabel ? `Каталог: ${report.catalogLabel}. ` : ''}
-          {report.reportDate ? `Дата отчёта: ${report.reportDate}.` : ''}
-        </p>
-      )}
+      <div className={styles.statsGrid}>
+        {stats.map((item) => (
+          <article className={styles.metricCard} key={item.label}>
+            <div className={styles.metricLabel}>{item.label}</div>
+            <div className={styles.metricValue}>{item.value}</div>
+          </article>
+        ))}
+      </div>
 
-      <details className={styles.accordion} style={{ marginTop: 12 }}>
+      <details className={styles.accordion} style={{ marginTop: 20 }}>
         <summary className={styles.accordionSummary}>
           Распознанные колонки
           <span className={styles.muted}>{validation.mappedColumns.length}</span>
@@ -61,7 +55,8 @@ export function ImportReport() {
           <ul className={styles.list}>
             {validation.mappedColumns.map((col) => (
               <li key={`${col.field}-${col.columnIndex}`}>
-                <strong>{col.header}</strong> → {col.field}
+                <strong>{col.header}</strong>
+                <span className={styles.muted}> → {col.field}</span>
               </li>
             ))}
           </ul>
@@ -104,7 +99,7 @@ export function ImportReport() {
         </div>
       ) : null}
 
-      <div className={styles.row} style={{ marginTop: 20 }}>
+      <div className={styles.footerBar}>
         <button type="button" className={styles.btnGhost} onClick={clearData}>
           Очистить данные
         </button>
