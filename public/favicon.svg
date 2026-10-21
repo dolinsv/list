@@ -1,9 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
   <rect width="512" height="512" rx="112" fill="#18181B"/>
-  <circle cx="256" cy="120" r="36" fill="#FAFAFA"/>
-  <circle cx="140" cy="280" r="30" fill="#A1A1AA"/>
-  <circle cx="372" cy="280" r="30" fill="#A1A1AA"/>
-  <circle cx="180" cy="400" r="26" fill="#71717A"/>
-  <circle cx="332" cy="400" r="26" fill="#71717A"/>
-  <path d="M256 156V250M256 250L150 268M256 250L362 268M150 310V370M362 310V370" stroke="#FAFAFA" stroke-width="28" stroke-linecap="round"/>
+  <!-- Hierarchy layers: structure levels -->
+  <rect x="156" y="112" width="200" height="56" rx="28" fill="#FAFAFA"/>
+  <rect x="116" y="228" width="280" height="56" rx="28" fill="#D4D4D8"/>
+  <rect x="76" y="344" width="360" height="56" rx="28" fill="#A1A1AA"/>
+  <!-- Connectors -->
+  <path
+    d="M256 168V228M196 284V344M316 284V344"
+    stroke="#FAFAFA"
+    stroke-width="20"
+    stroke-linecap="round"
+  />
 </svg>
