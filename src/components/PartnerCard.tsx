@@ -12,7 +12,10 @@ import { useSession } from '../context/SessionContext';
 import { getDirectReports } from '../features/partners/buildPartnerIndex';
 import { getLevelRelativeToRoot } from '../features/structure/calculateLevels';
 import { copyText, formatNumber, getInitials } from '../utils/formatters';
+import { decodePartnerStatus } from '../features/status/statusGlossary';
 import { MetricCard } from './MetricCard';
+import { PhoneActions } from './PhoneActions';
+import { StatusDecode } from './StatusDecode';
 
 const DIRECT_PREVIEW = 8;
 
@@ -121,6 +124,8 @@ export function PartnerCard() {
     setTab(tab === 'card' ? 'partners' : tab);
   };
 
+  const statusDecoded = decodePartnerStatus(partner.status);
+
   return (
     <div className={styles.stack}>
       <section className={styles.panel}>
@@ -139,7 +144,16 @@ export function PartnerCard() {
                   Уровень {level} от корня
                 </span>
               ) : null}
-              {partner.status ? (
+              {statusDecoded?.matches.map((item) => (
+                <span
+                  key={item.code}
+                  className={styles.chip}
+                  title={`${item.title}: ${item.description}`}
+                >
+                  {item.code === '+' ? '(+)' : `(${item.code})`} {item.title}
+                </span>
+              ))}
+              {statusDecoded && statusDecoded.matches.length === 0 && partner.status ? (
                 <span className={styles.chip}>{partner.status}</span>
               ) : null}
             </div>
@@ -190,19 +204,13 @@ export function PartnerCard() {
                   <Phone size={15} strokeWidth={2} />
                 </span>
                 <div className={styles.contactBody}>
-                  <div className={styles.contactLabel}>Телефон</div>
+                  <div className={styles.contactLabel}>
+                    Телефон · нажмите, чтобы открыть мессенджер
+                  </div>
                   <div className={styles.contactValue}>
-                    <a href={`tel:${partner.phone}`}>{partner.phone}</a>
+                    <PhoneActions phone={partner.phone} />
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className={styles.iconBtn}
-                  aria-label="Копировать телефон"
-                  onClick={() => void onCopy(partner.phone!, 'Телефон')}
-                >
-                  <Copy size={14} strokeWidth={2} />
-                </button>
               </div>
             ) : null}
             {partner.email ? (
@@ -233,20 +241,15 @@ export function PartnerCard() {
       {(partner.registrationCatalog || partner.status) && (
         <section className={styles.panel}>
           <h3 className={styles.blockTitle}>Информация о партнёре</h3>
-          <div className={styles.kvGrid}>
-            {partner.registrationCatalog ? (
+          {partner.registrationCatalog ? (
+            <div className={styles.kvGrid} style={{ marginBottom: partner.status ? 16 : 0 }}>
               <dl className={styles.kv}>
                 <dt>Каталог присоединения</dt>
                 <dd>{partner.registrationCatalog}</dd>
               </dl>
-            ) : null}
-            {partner.status ? (
-              <dl className={styles.kv}>
-                <dt>Статус</dt>
-                <dd>{partner.status}</dd>
-              </dl>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
+          <StatusDecode status={partner.status} />
         </section>
       )}
 

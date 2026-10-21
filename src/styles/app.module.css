@@ -321,6 +321,119 @@
   font-weight: 600;
 }
 
+/* Phone actions */
+.phoneActions {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.phoneTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+  padding: 0;
+  text-align: left;
+}
+
+.phoneTrigger:hover {
+  color: var(--accent);
+}
+
+.phoneMenu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  z-index: 40;
+  min-width: min(280px, 78vw);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.phoneMenuNote {
+  margin: 0 0 0.35rem;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ink-muted);
+  background: var(--surface-muted);
+  border-radius: var(--radius-xs);
+}
+
+.phoneMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  padding: 0.65rem 0.7rem;
+  border-radius: var(--radius-xs);
+}
+
+.phoneMenuItem:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+.phoneMenuItem:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Status decode */
+.statusBlock {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.statusHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.statusRaw {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.statusList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.statusItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.statusLegend {
+  margin-top: 0.25rem;
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+}
+
 /* Forms */
 .field {
   display: grid;
