@@ -35,6 +35,7 @@ type Action =
       type: 'OPEN_PARTNERS';
       focus?: boolean;
       minPersonalBB?: string | null;
+      directOnly?: boolean;
     }
   | { type: 'CLEAR_PARTNERS_FOCUS' }
   | { type: 'SET_TOAST'; message: string | null }
@@ -50,7 +51,7 @@ const initialState: SessionState = {
   importError: null,
   isParsing: false,
   cardReturnTab: null,
-  partnersIntent: { focusToken: 0, minPersonalBB: null },
+  partnersIntent: { focusToken: 0, minPersonalBB: null, directOnly: false },
   toastMessage: null,
 };
 
@@ -127,6 +128,10 @@ function reducer(state: SessionState, action: Action): SessionState {
             action.minPersonalBB === undefined
               ? state.partnersIntent.minPersonalBB
               : action.minPersonalBB,
+          directOnly:
+            action.directOnly === undefined
+              ? state.partnersIntent.directOnly
+              : action.directOnly,
         },
       };
     case 'CLEAR_PARTNERS_FOCUS':
@@ -164,6 +169,7 @@ type SessionContextValue = {
   openPartners: (options?: {
     focus?: boolean;
     minPersonalBB?: string | null;
+    directOnly?: boolean;
   }) => void;
   clearPartnersFocus: () => void;
   showToast: (message: string) => void;
@@ -251,6 +257,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           type: 'OPEN_PARTNERS',
           focus: options?.focus,
           minPersonalBB: options?.minPersonalBB,
+          directOnly: options?.directOnly,
         }),
       clearPartnersFocus: () => dispatch({ type: 'CLEAR_PARTNERS_FOCUS' }),
       showToast,

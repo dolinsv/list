@@ -93,6 +93,8 @@ export type PartnersIntent = {
   /** Увеличивается при каждом запросе фокуса поиска */
   focusToken: number;
   minPersonalBB: string | null;
+  /** Только партнёры, у которых спонсор = корень («Я спонсор») */
+  directOnly: boolean;
 };
 
 export type SessionState = {

@@ -1,17 +1,19 @@
 import { useMemo, useState } from 'react';
-import { Search, Network, Activity } from 'lucide-react';
+import { ChevronDown, Search, Network, Activity } from 'lucide-react';
 import styles from '../styles/app.module.css';
 import { useSession } from '../context/SessionContext';
 import { calculateMetrics } from '../features/analytics/calculateMetrics';
 import { calculateLevelsRelativeToRoot } from '../features/structure/calculateLevels';
 import { getDirectReports } from '../features/partners/buildPartnerIndex';
 import { MetricCard } from './MetricCard';
-import { formatPartnerLabel } from '../utils/formatters';
+
+type InsightId = 'direct' | 'nonzero' | 'warnings' | 'branches';
 
 export function OverviewPanel() {
   const { state, index, hasSponsorField, openPartners, setTab } = useSession();
   const rootNumber = state.rootPartnerNumber;
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [openInsight, setOpenInsight] = useState<InsightId | null>(null);
 
   const metrics = useMemo(() => {
     if (!index || !rootNumber) return null;
@@ -23,16 +25,23 @@ export function OverviewPanel() {
     return calculateLevelsRelativeToRoot(index, rootNumber, hasSponsorField);
   }, [index, rootNumber, hasSponsorField]);
 
-  const attentionCount = useMemo(() => {
+  const attentionWarnings = useMemo(() => {
     const warnings = state.report?.validation.warnings ?? [];
-    return warnings
-      .filter((w) =>
-        ['missing_sponsors', 'cycles', 'self_sponsor', 'empty_numbers', 'duplicate_numbers'].includes(
-          w.code,
-        ),
-      )
-      .reduce((sum, w) => sum + (w.count ?? 0), 0);
+    return warnings.filter((w) =>
+      [
+        'missing_sponsors',
+        'cycles',
+        'self_sponsor',
+        'empty_numbers',
+        'duplicate_numbers',
+      ].includes(w.code),
+    );
   }, [state.report]);
+
+  const attentionCount = attentionWarnings.reduce(
+    (sum, w) => sum + (w.count ?? 0),
+    0,
+  );
 
   if (!metrics || !rootNumber) return null;
 
@@ -40,6 +49,8 @@ export function OverviewPanel() {
   const directCount = byId.direct_count?.value ?? null;
   const nonzero = byId.nonzero_personal_bb?.value ?? null;
   const hasPersonalBB = metrics.root?.personalBB !== null;
+  const branchCount =
+    index && rootNumber ? getDirectReports(index, rootNumber).length : 0;
   const maxLevelCount = Math.max(1, ...levels.map((l) => l.count));
   const showLevels =
     hasSponsorField &&
@@ -55,7 +66,7 @@ export function OverviewPanel() {
     },
     {
       id: 'direct_count',
-      label: 'Непосредственные',
+      label: 'Я спонсор',
       hint: 'Партнёры первого уровня: у них в поле «Спонсор» указан ваш номер.',
     },
     {
@@ -75,17 +86,12 @@ export function OverviewPanel() {
     },
   ] as const;
 
+  const toggleInsight = (id: InsightId) => {
+    setOpenInsight((current) => (current === id ? null : id));
+  };
+
   return (
     <div className={styles.stack}>
-      <section>
-        <p className={styles.sectionLead} style={{ marginBottom: 0 }}>
-          Краткая картина команды ·{' '}
-          <strong>
-            {formatPartnerLabel(rootNumber, metrics.root?.fullName ?? null)}
-          </strong>
-        </p>
-      </section>
-
       <section className={styles.metricsGrid}>
         {overviewCards.map((card) => (
           <MetricCard
@@ -103,7 +109,13 @@ export function OverviewPanel() {
           <button
             type="button"
             className={styles.actionCard}
-            onClick={() => openPartners({ focus: true, minPersonalBB: null })}
+            onClick={() =>
+              openPartners({
+                focus: true,
+                minPersonalBB: null,
+                directOnly: false,
+              })
+            }
           >
             <span className={styles.actionIcon}>
               <Search size={16} strokeWidth={2} />
@@ -133,6 +145,7 @@ export function OverviewPanel() {
               openPartners({
                 focus: true,
                 minPersonalBB: hasPersonalBB || nonzero != null ? '1' : null,
+                directOnly: false,
               })
             }
             disabled={nonzero == null && !hasPersonalBB}
@@ -152,36 +165,183 @@ export function OverviewPanel() {
         <h3 className={styles.blockTitle}>Полезные сведения</h3>
         <ul className={styles.infoList}>
           {directCount != null ? (
-            <li>
-              <span>Непосредственных партнёров</span>
-              <strong>{directCount}</strong>
+            <li className={styles.infoItem}>
+              <button
+                type="button"
+                className={styles.infoRowBtn}
+                aria-expanded={openInsight === 'direct'}
+                onClick={() => toggleInsight('direct')}
+              >
+                <span>Я спонсор</span>
+                <span className={styles.infoRowValue}>
+                  <strong>{directCount}</strong>
+                  <ChevronDown
+                    size={16}
+                    strokeWidth={2}
+                    className={
+                      openInsight === 'direct'
+                        ? styles.infoChevronOpen
+                        : styles.infoChevron
+                    }
+                    aria-hidden
+                  />
+                </span>
+              </button>
+              {openInsight === 'direct' ? (
+                <div className={styles.infoDetail}>
+                  <p>
+                    Партнёры первого уровня: в поле «Спонсор» указан ваш номер.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.btn}
+                    onClick={() =>
+                      openPartners({
+                        focus: true,
+                        minPersonalBB: null,
+                        directOnly: true,
+                      })
+                    }
+                  >
+                    Открыть список
+                  </button>
+                </div>
+              ) : null}
             </li>
           ) : null}
+
           {nonzero != null ? (
-            <li>
-              <span>С ненулевыми личными ББ в структуре</span>
-              <strong>{nonzero}</strong>
+            <li className={styles.infoItem}>
+              <button
+                type="button"
+                className={styles.infoRowBtn}
+                aria-expanded={openInsight === 'nonzero'}
+                onClick={() => toggleInsight('nonzero')}
+              >
+                <span>С ненулевыми личными ББ в структуре</span>
+                <span className={styles.infoRowValue}>
+                  <strong>{nonzero}</strong>
+                  <ChevronDown
+                    size={16}
+                    strokeWidth={2}
+                    className={
+                      openInsight === 'nonzero'
+                        ? styles.infoChevronOpen
+                        : styles.infoChevron
+                    }
+                    aria-hidden
+                  />
+                </span>
+              </button>
+              {openInsight === 'nonzero' ? (
+                <div className={styles.infoDetail}>
+                  <p>
+                    Партнёры в вашей структуре с личными ББ больше нуля. Пустое
+                    значение в отчёте не считается нулём.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.btn}
+                    onClick={() =>
+                      openPartners({
+                        focus: true,
+                        minPersonalBB: '1',
+                        directOnly: false,
+                      })
+                    }
+                  >
+                    Открыть список
+                  </button>
+                </div>
+              ) : null}
             </li>
           ) : null}
+
           {attentionCount > 0 ? (
-            <li>
-              <span>Записей с замечаниями по связям или номерам</span>
-              <strong>{attentionCount}</strong>
+            <li className={styles.infoItem}>
+              <button
+                type="button"
+                className={styles.infoRowBtn}
+                aria-expanded={openInsight === 'warnings'}
+                onClick={() => toggleInsight('warnings')}
+              >
+                <span>Записей с замечаниями по связям или номерам</span>
+                <span className={styles.infoRowValue}>
+                  <strong>{attentionCount}</strong>
+                  <ChevronDown
+                    size={16}
+                    strokeWidth={2}
+                    className={
+                      openInsight === 'warnings'
+                        ? styles.infoChevronOpen
+                        : styles.infoChevron
+                    }
+                    aria-hidden
+                  />
+                </span>
+              </button>
+              {openInsight === 'warnings' ? (
+                <div className={styles.infoDetail}>
+                  <ul className={styles.infoDetailList}>
+                    {attentionWarnings.map((w) => (
+                      <li key={w.code}>
+                        {w.message}
+                        {w.count != null ? (
+                          <strong> · {w.count}</strong>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </li>
           ) : (
-            <li>
-              <span>Критичных проблем со связями не отмечено</span>
-              <strong>—</strong>
+            <li className={styles.infoItem}>
+              <div className={styles.infoRowStatic}>
+                <span>Критичных проблем со связями не отмечено</span>
+                <strong>—</strong>
+              </div>
             </li>
           )}
+
           {hasSponsorField ? (
-            <li>
-              <span>Прямых веток у корня</span>
-              <strong>
-                {index && rootNumber
-                  ? getDirectReports(index, rootNumber).length
-                  : '—'}
-              </strong>
+            <li className={styles.infoItem}>
+              <button
+                type="button"
+                className={styles.infoRowBtn}
+                aria-expanded={openInsight === 'branches'}
+                onClick={() => toggleInsight('branches')}
+              >
+                <span>Прямых веток у корня</span>
+                <span className={styles.infoRowValue}>
+                  <strong>{branchCount}</strong>
+                  <ChevronDown
+                    size={16}
+                    strokeWidth={2}
+                    className={
+                      openInsight === 'branches'
+                        ? styles.infoChevronOpen
+                        : styles.infoChevron
+                    }
+                    aria-hidden
+                  />
+                </span>
+              </button>
+              {openInsight === 'branches' ? (
+                <div className={styles.infoDetail}>
+                  <p>
+                    Сколько непосредственных веток начинается от выбранного
+                    корня в дереве структуры.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.btn}
+                    onClick={() => setTab('structure')}
+                  >
+                    Открыть структуру
+                  </button>
+                </div>
+              ) : null}
             </li>
           ) : null}
         </ul>

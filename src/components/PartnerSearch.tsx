@@ -19,33 +19,46 @@ export function PartnerSearch() {
   const [query, setQuery] = useState('');
   const [hasContacts, setHasContacts] = useState<'any' | 'yes' | 'no'>('any');
   const [minPersonalBB, setMinPersonalBB] = useState('');
+  const [directOnly, setDirectOnly] = useState(false);
   const [page, setPage] = useState(0);
   const deferredQuery = useDeferredValue(query);
+  const rootNumber = state.rootPartnerNumber;
 
   useEffect(() => {
     const intent = state.partnersIntent;
-    if (intent.minPersonalBB != null) {
-      setMinPersonalBB(intent.minPersonalBB);
-      setPage(0);
-    }
-    if (intent.focusToken > 0) {
-      window.requestAnimationFrame(() => {
-        inputRef.current?.focus();
-        inputRef.current?.select();
-      });
-      clearPartnersFocus();
-    }
+    if (intent.focusToken <= 0) return;
+
+    setMinPersonalBB(intent.minPersonalBB ?? '');
+    setDirectOnly(intent.directOnly);
+    setPage(0);
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    });
+    clearPartnersFocus();
   }, [state.partnersIntent, clearPartnersFocus]);
 
   const hits = useMemo(() => {
-    const partners = state.report?.partners ?? [];
+    let partners = state.report?.partners ?? [];
+    if (directOnly && rootNumber) {
+      partners = partners.filter(
+        (partner) => partner.sponsorNumber === rootNumber,
+      );
+    }
     return searchPartners(partners, {
       query: deferredQuery,
       hasContacts:
         hasContacts === 'any' ? null : hasContacts === 'yes' ? true : false,
       minPersonalBB: minPersonalBB ? Number(minPersonalBB) : null,
     });
-  }, [state.report, deferredQuery, hasContacts, minPersonalBB]);
+  }, [
+    state.report,
+    deferredQuery,
+    hasContacts,
+    minPersonalBB,
+    directOnly,
+    rootNumber,
+  ]);
 
   const pageCount = Math.max(1, Math.ceil(hits.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount - 1);
@@ -53,6 +66,8 @@ export function PartnerSearch() {
     safePage * PAGE_SIZE,
     safePage * PAGE_SIZE + PAGE_SIZE,
   );
+  const hasFilters =
+    query || hasContacts !== 'any' || minPersonalBB || directOnly;
 
   return (
     <section className={styles.stack}>
@@ -111,8 +126,14 @@ export function PartnerSearch() {
         <div className={styles.resultMeta}>
           <span className={styles.muted}>
             Найдено: <strong>{hits.length}</strong>
+            {directOnly ? (
+              <>
+                {' '}
+                · фильтр «Я спонсор»
+              </>
+            ) : null}
           </span>
-          {(query || hasContacts !== 'any' || minPersonalBB) && (
+          {hasFilters ? (
             <button
               type="button"
               className={styles.btnGhost}
@@ -120,12 +141,13 @@ export function PartnerSearch() {
                 setQuery('');
                 setHasContacts('any');
                 setMinPersonalBB('');
+                setDirectOnly(false);
                 setPage(0);
               }}
             >
               Сбросить фильтры
             </button>
-          )}
+          ) : null}
         </div>
 
         <PartnerTable

@@ -76,7 +76,7 @@ export function calculateMetrics(
     },
     {
       id: 'direct_count',
-      title: 'Непосредственные партнёры',
+      title: 'Я спонсор',
       value: hasSponsorField ? directs.length : null,
       scope: 'structure',
       source: 'Партнёры, у которых спонсор = выбранный корень',
