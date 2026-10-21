@@ -34,7 +34,6 @@ export function FileUploader() {
         <h2 className={styles.blockTitle}>Как начать</h2>
         <ol className={styles.steps}>
           <li>Загрузите информационный листок Excel.</li>
-          <li>Проверьте, что колонки распознаны корректно.</li>
           <li>Изучайте обзор, поиск и структуру команды.</li>
         </ol>
       </div>
