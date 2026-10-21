@@ -27,3 +27,19 @@ export function calculateLevelsRelativeToRoot(
     .sort((a, b) => a[0] - b[0])
     .map(([level, count]) => ({ level, count }));
 }
+
+/** Уровень партнёра относительно корня анализа; null если вне структуры */
+export function getLevelRelativeToRoot(
+  index: PartnerIndex,
+  rootNumber: string,
+  partnerNumber: string,
+  hasSponsorField: boolean,
+): number | null {
+  if (!hasSponsorField) return null;
+  const tree = buildStructureTree(index, rootNumber, hasSponsorField);
+  if (!tree.root) return null;
+  const found = flattenStructure(tree.root).find(
+    (n) => n.partnerNumber === partnerNumber,
+  );
+  return found ? found.level : null;
+}

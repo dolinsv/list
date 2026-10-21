@@ -24,7 +24,7 @@ export function RootSelector() {
     const ok = confirmRoot(number);
     if (!ok) {
       setError(
-        'Выбранный номер не найден в загруженном отчёте. Проверьте ввод или вернитесь к проверке файла.',
+        'Этот номер не найден в отчёте. Проверьте ввод или вернитесь к проверке файла.',
       );
       return;
     }
@@ -33,23 +33,25 @@ export function RootSelector() {
 
   return (
     <section className={styles.panel}>
-      <h2 className={styles.panelTitle}>Выбор собственного номера</h2>
-      <p className={styles.panelLead}>
-        Подтвердите, что выбранный партнёр — корень анализа. Автоматический
-        выбор без подтверждения не выполняется.
+      <h2 className={styles.sectionTitle}>Ваш номер партнёра</h2>
+      <p className={styles.sectionLead}>
+        Подтвердите, кто будет корнем анализа. Автоматический выбор без вашего
+        согласия не выполняется.
       </p>
 
       {suggested ? (
-        <div className={`${styles.alert} ${styles.alertOk}`}>
-          Предложение:{' '}
-          {formatPartnerLabel(
-            suggested,
-            state.report?.validation.suggestedRootName ?? null,
-          )}
+        <div className={`${styles.alert} ${styles.alertInfo}`}>
+          Предложение из отчёта:{' '}
+          <strong>
+            {formatPartnerLabel(
+              suggested,
+              state.report?.validation.suggestedRootName ?? null,
+            )}
+          </strong>
         </div>
       ) : null}
 
-      <div className={styles.field}>
+      <div className={styles.field} style={{ marginTop: 16 }}>
         <label htmlFor="root-number">Номер партнёра</label>
         <input
           id="root-number"
@@ -65,11 +67,21 @@ export function RootSelector() {
         />
       </div>
 
-      <div className={styles.field}>
-        <span>Подтверждение ФИО</span>
-        <strong>
-          {preview?.fullName ?? (value ? 'Номер не найден в отчёте' : '—')}
-        </strong>
+      <div className={styles.field} style={{ marginTop: 12 }}>
+        <label>Подтверждение ФИО</label>
+        <div
+          className={styles.panelTight}
+          style={{
+            background: 'var(--surface-muted)',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--line)',
+          }}
+        >
+          <strong>
+            {preview?.fullName ??
+              (value ? 'Номер не найден в отчёте' : 'Введите номер')}
+          </strong>
+        </div>
       </div>
 
       {error ? (
@@ -78,16 +90,16 @@ export function RootSelector() {
         </div>
       ) : null}
 
-      <div className={styles.row}>
+      <div className={styles.row} style={{ marginTop: 20 }}>
         <button
           type="button"
           className={styles.btnGhost}
           onClick={() => setView('import')}
         >
-          Назад к проверке
+          Назад
         </button>
         <button type="button" className={styles.btnGhost} onClick={clearData}>
-          Очистить данные
+          Очистить
         </button>
         <button
           type="button"
@@ -95,7 +107,7 @@ export function RootSelector() {
           onClick={onConfirm}
           disabled={!preview}
         >
-          Подтвердить и открыть анализ
+          Открыть анализ
         </button>
       </div>
     </section>

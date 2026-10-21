@@ -1,21 +1,23 @@
 import styles from '../styles/app.module.css';
-import type { MetricCardData } from '../features/analytics/calculateMetrics';
 import { formatNumber } from '../utils/formatters';
+import { Hint } from './Hint';
 
-const scopeLabel = {
-  report: 'Весь отчёт',
-  structure: 'Структура выбранного партнёра',
-} as const;
+type Props = {
+  label: string;
+  value: number | null;
+  hint?: string;
+};
 
-export function MetricCard({ metric }: { metric: MetricCardData }) {
+export function MetricCard({ label, value, hint }: Props) {
+  if (value === null) return null;
+
   return (
-    <article className={styles.metric} title={metric.source}>
-      <div className={styles.metricLabel}>{metric.title}</div>
-      <div className={styles.metricValue}>{formatNumber(metric.value)}</div>
-      <div className={styles.metricScope}>{scopeLabel[metric.scope]}</div>
-      {metric.note ? (
-        <div className={styles.metricScope}>{metric.note}</div>
-      ) : null}
+    <article className={styles.metricCard}>
+      <div className={styles.metricLabel}>
+        <span>{label}</span>
+        {hint ? <Hint text={hint} /> : null}
+      </div>
+      <div className={styles.metricValue}>{formatNumber(value)}</div>
     </article>
   );
 }

@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
   type ReactNode,
@@ -24,8 +25,19 @@ type Action =
   | { type: 'CONFIRM_ROOT'; partnerNumber: string }
   | { type: 'SET_VIEW'; view: AppView }
   | { type: 'SET_TAB'; tab: DashboardTab }
-  | { type: 'SELECT_PARTNER'; partnerNumber: string | null }
+  | {
+      type: 'SELECT_PARTNER';
+      partnerNumber: string | null;
+      returnTab?: DashboardTab | null;
+    }
   | { type: 'SET_STRUCTURE_SEARCH'; query: string }
+  | {
+      type: 'OPEN_PARTNERS';
+      focus?: boolean;
+      minPersonalBB?: string | null;
+    }
+  | { type: 'CLEAR_PARTNERS_FOCUS' }
+  | { type: 'SET_TOAST'; message: string | null }
   | { type: 'CLEAR' };
 
 const initialState: SessionState = {
@@ -37,6 +49,9 @@ const initialState: SessionState = {
   structureSearch: '',
   importError: null,
   isParsing: false,
+  cardReturnTab: null,
+  partnersIntent: { focusToken: 0, minPersonalBB: null },
+  toastMessage: null,
 };
 
 function reducer(state: SessionState, action: Action): SessionState {
@@ -66,6 +81,7 @@ function reducer(state: SessionState, action: Action): SessionState {
         selectedPartnerNumber: action.partnerNumber,
         view: 'dashboard',
         tab: 'overview',
+        cardReturnTab: null,
       };
     case 'SET_VIEW':
       return { ...state, view: action.view };
@@ -76,9 +92,37 @@ function reducer(state: SessionState, action: Action): SessionState {
         ...state,
         selectedPartnerNumber: action.partnerNumber,
         tab: action.partnerNumber ? 'card' : state.tab,
+        cardReturnTab:
+          action.partnerNumber != null
+            ? (action.returnTab ?? state.tab)
+            : state.cardReturnTab,
       };
     case 'SET_STRUCTURE_SEARCH':
       return { ...state, structureSearch: action.query };
+    case 'OPEN_PARTNERS':
+      return {
+        ...state,
+        tab: 'partners',
+        partnersIntent: {
+          focusToken: action.focus
+            ? state.partnersIntent.focusToken + 1
+            : state.partnersIntent.focusToken,
+          minPersonalBB:
+            action.minPersonalBB === undefined
+              ? state.partnersIntent.minPersonalBB
+              : action.minPersonalBB,
+        },
+      };
+    case 'CLEAR_PARTNERS_FOCUS':
+      return {
+        ...state,
+        partnersIntent: {
+          ...state.partnersIntent,
+          focusToken: 0,
+        },
+      };
+    case 'SET_TOAST':
+      return { ...state, toastMessage: action.message };
     case 'CLEAR':
       return { ...initialState };
     default:
@@ -95,9 +139,19 @@ type SessionContextValue = {
   clearData: () => void;
   setView: (view: AppView) => void;
   setTab: (tab: DashboardTab) => void;
-  selectPartner: (partnerNumber: string | null) => void;
+  selectPartner: (
+    partnerNumber: string | null,
+    returnTab?: DashboardTab | null,
+  ) => void;
   setStructureSearch: (query: string) => void;
   changeRoot: () => void;
+  openPartners: (options?: {
+    focus?: boolean;
+    minPersonalBB?: string | null;
+  }) => void;
+  clearPartnersFocus: () => void;
+  showToast: (message: string) => void;
+  dismissToast: () => void;
 };
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -125,7 +179,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         error instanceof Error
           ? error.message
           : 'Не удалось обработать файл.';
-      // Сообщение об ошибке не должно включать персональные данные файла
       dispatch({ type: 'PARSE_ERROR', message });
     }
   }, []);
@@ -146,6 +199,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     clearBrowserReportTraces();
   }, []);
 
+  const showToast = useCallback((message: string) => {
+    dispatch({ type: 'SET_TOAST', message });
+  }, []);
+
+  const dismissToast = useCallback(() => {
+    dispatch({ type: 'SET_TOAST', message: null });
+  }, []);
+
+  useEffect(() => {
+    if (!state.toastMessage) return;
+    const timer = window.setTimeout(() => {
+      dispatch({ type: 'SET_TOAST', message: null });
+    }, 2200);
+    return () => window.clearTimeout(timer);
+  }, [state.toastMessage]);
+
   const value = useMemo<SessionContextValue>(
     () => ({
       state,
@@ -156,11 +225,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       clearData,
       setView: (view) => dispatch({ type: 'SET_VIEW', view }),
       setTab: (tab) => dispatch({ type: 'SET_TAB', tab }),
-      selectPartner: (partnerNumber) =>
-        dispatch({ type: 'SELECT_PARTNER', partnerNumber }),
+      selectPartner: (partnerNumber, returnTab) =>
+        dispatch({ type: 'SELECT_PARTNER', partnerNumber, returnTab }),
       setStructureSearch: (query) =>
         dispatch({ type: 'SET_STRUCTURE_SEARCH', query }),
       changeRoot: () => dispatch({ type: 'SET_VIEW', view: 'select-root' }),
+      openPartners: (options) =>
+        dispatch({
+          type: 'OPEN_PARTNERS',
+          focus: options?.focus,
+          minPersonalBB: options?.minPersonalBB,
+        }),
+      clearPartnersFocus: () => dispatch({ type: 'CLEAR_PARTNERS_FOCUS' }),
+      showToast,
+      dismissToast,
     }),
     [
       state,
@@ -169,6 +247,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       loadFile,
       confirmRoot,
       clearData,
+      showToast,
+      dismissToast,
     ],
   );
 

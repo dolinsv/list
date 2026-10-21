@@ -89,6 +89,12 @@ export type AppView =
 
 export type DashboardTab = 'overview' | 'partners' | 'structure' | 'card';
 
+export type PartnersIntent = {
+  /** Увеличивается при каждом запросе фокуса поиска */
+  focusToken: number;
+  minPersonalBB: string | null;
+};
+
 export type SessionState = {
   view: AppView;
   tab: DashboardTab;
@@ -98,4 +104,8 @@ export type SessionState = {
   structureSearch: string;
   importError: string | null;
   isParsing: boolean;
+  /** Откуда открыли карточку — для кнопки «Назад» */
+  cardReturnTab: DashboardTab | null;
+  partnersIntent: PartnersIntent;
+  toastMessage: string | null;
 };

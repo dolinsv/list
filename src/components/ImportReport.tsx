@@ -10,79 +10,92 @@ export function ImportReport() {
 
   return (
     <section className={styles.panel}>
-      <h2 className={styles.panelTitle}>Проверка отчёта</h2>
-      <p className={styles.panelLead}>
-        Файл обработан локально. Ниже — результат распознавания без перехода к
-        аналитике до вашего подтверждения.
+      <h2 className={styles.sectionTitle}>Проверка отчёта</h2>
+      <p className={styles.sectionLead}>
+        Файл обработан локально. Перед анализом убедитесь, что структура
+        распознана верно.
       </p>
 
-      <div className={styles.gridMetrics}>
-        <div className={styles.metric}>
+      <div className={styles.metricsGrid} style={{ marginBottom: 20 }}>
+        <article className={styles.metricCard}>
           <div className={styles.metricLabel}>Файл</div>
           <div className={styles.metricValue} style={{ fontSize: '1rem' }}>
             {validation.fileName}
           </div>
-        </div>
-        <div className={styles.metric}>
-          <div className={styles.metricLabel}>Строк данных</div>
+        </article>
+        <article className={styles.metricCard}>
+          <div className={styles.metricLabel}>Строк</div>
           <div className={styles.metricValue}>{validation.rowCount}</div>
-        </div>
-        <div className={styles.metric}>
+        </article>
+        <article className={styles.metricCard}>
           <div className={styles.metricLabel}>Партнёров</div>
           <div className={styles.metricValue}>{validation.partnerCount}</div>
-        </div>
-        <div className={styles.metric}>
+        </article>
+        <article className={styles.metricCard}>
           <div className={styles.metricLabel}>Уникальных номеров</div>
           <div className={styles.metricValue}>{validation.uniqueNumbers}</div>
-        </div>
-        <div className={styles.metric}>
-          <div className={styles.metricLabel}>Пропуски ключевых полей</div>
+        </article>
+        <article className={styles.metricCard}>
+          <div className={styles.metricLabel}>Пропуски полей</div>
           <div className={styles.metricValue}>{validation.missingKeyFields}</div>
-        </div>
-        <div className={styles.metric}>
-          <div className={styles.metricLabel}>Повторяющиеся номера</div>
+        </article>
+        <article className={styles.metricCard}>
+          <div className={styles.metricLabel}>Дубликаты номеров</div>
           <div className={styles.metricValue}>{validation.duplicateNumbers}</div>
-        </div>
+        </article>
       </div>
 
-      {report.catalogLabel || report.reportDate ? (
+      {(report.catalogLabel || report.reportDate) && (
         <p className={styles.muted}>
-          {report.catalogLabel ? `Каталог отчёта: ${report.catalogLabel}. ` : ''}
+          {report.catalogLabel ? `Каталог: ${report.catalogLabel}. ` : ''}
           {report.reportDate ? `Дата отчёта: ${report.reportDate}.` : ''}
         </p>
-      ) : null}
+      )}
 
-      <h3>Распознанные колонки</h3>
-      <ul className={styles.list}>
-        {validation.mappedColumns.map((col) => (
-          <li key={`${col.field}-${col.columnIndex}`}>
-            <strong>{col.header}</strong> → {col.field}
-          </li>
-        ))}
-      </ul>
+      <details className={styles.accordion} style={{ marginTop: 12 }}>
+        <summary className={styles.accordionSummary}>
+          Распознанные колонки
+          <span className={styles.muted}>{validation.mappedColumns.length}</span>
+        </summary>
+        <div className={styles.accordionBody}>
+          <ul className={styles.list}>
+            {validation.mappedColumns.map((col) => (
+              <li key={`${col.field}-${col.columnIndex}`}>
+                <strong>{col.header}</strong> → {col.field}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </details>
 
       {validation.criticalErrors.length > 0 ? (
-        <div className={`${styles.alert} ${styles.alertError}`} role="alert">
-          <strong>Критические проблемы</strong>
+        <div
+          className={`${styles.alert} ${styles.alertError}`}
+          role="alert"
+          style={{ marginTop: 16 }}
+        >
+          <strong>Что мешает анализу</strong>
           <ul className={styles.list}>
             {validation.criticalErrors.map((err) => (
               <li key={err}>{err}</li>
             ))}
           </ul>
+          <div style={{ marginTop: 8 }}>
+            Загрузите другой файл или очистите данные и попробуйте снова.
+          </div>
         </div>
       ) : (
-        <div className={`${styles.alert} ${styles.alertOk}`}>
-          Обязательные поля для базового анализа распознаны. Можно выбрать свой
-          номер партнёра.
+        <div className={`${styles.alert} ${styles.alertOk}`} style={{ marginTop: 16 }}>
+          Обязательные поля распознаны. Можно выбрать свой номер партнёра.
         </div>
       )}
 
       {validation.warnings.length > 0 ? (
-        <div className={`${styles.alert} ${styles.alertWarn}`}>
+        <div className={`${styles.alert} ${styles.alertWarn}`} style={{ marginTop: 12 }}>
           <strong>Предупреждения</strong>
           <ul className={styles.list}>
             {validation.warnings.map((w) => (
-              <li key={w.code + (w.message)}>
+              <li key={w.code + w.message}>
                 {w.message}
                 {typeof w.count === 'number' ? ` (${w.count})` : ''}
               </li>
@@ -91,7 +104,7 @@ export function ImportReport() {
         </div>
       ) : null}
 
-      <div className={styles.row}>
+      <div className={styles.row} style={{ marginTop: 20 }}>
         <button type="button" className={styles.btnGhost} onClick={clearData}>
           Очистить данные
         </button>

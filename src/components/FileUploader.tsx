@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, type DragEvent } from 'react';
+import { Upload } from 'lucide-react';
 import styles from '../styles/app.module.css';
 import { useSession } from '../context/SessionContext';
 
@@ -27,18 +28,19 @@ export function FileUploader() {
 
   return (
     <section className={styles.hero}>
-      <h1 className={styles.heroBrand}>Анализ структуры Oriflame</h1>
-      <p className={styles.heroText}>
-        Загрузите информационный листок Excel — приложение разберёт его локально
-        в браузере, поможет выбрать ваш номер партнёра и покажет структуру,
-        поиск и аналитику без отправки данных на сервер.
-      </p>
+      <div>
+        <h1 className={styles.heroBrand}>Анализ структуры Oriflame</h1>
+        <p className={styles.heroText}>
+          Загрузите информационный листок — приложение разберёт его локально и
+          поможет понять вашу команду: поиск, структура и показатели без отправки
+          данных на сервер.
+        </p>
+      </div>
 
       <div className={styles.privacyNote}>
-        <strong>Приватность.</strong> Файл читается только через File API в
-        оперативной памяти. Отчёт не сохраняется в localStorage, cookies и не
-        уходит во внешние сервисы. После очистки или перезагрузки страницы данные
-        исчезают.
+        <strong>Приватность.</strong> Файл читается только в браузере. Отчёт не
+        сохраняется и не уходит во внешние сервисы. После очистки или
+        перезагрузки данные исчезают.
       </div>
 
       <div
@@ -54,18 +56,30 @@ export function FileUploader() {
         onDragLeave={() => setDragOver(false)}
         onDrop={onDrop}
       >
-        <p className={styles.panelLead}>
+        <Upload
+          size={28}
+          strokeWidth={1.75}
+          style={{ color: 'var(--accent)', marginBottom: 12 }}
+        />
+        <p className={styles.sectionLead} style={{ margin: '0 auto 0.5rem' }}>
           Перетащите файл сюда или выберите на устройстве
         </p>
-        <p className={styles.muted}>Поддерживаемые форматы: .xlsx, .xls</p>
-        <div className={styles.row} style={{ justifyContent: 'center' }}>
+        <p className={styles.muted}>Форматы: .xlsx, .xls</p>
+        <div className={styles.row} style={{ justifyContent: 'center', marginTop: 16 }}>
           <button
             type="button"
             className={styles.btnPrimary}
             disabled={state.isParsing}
             onClick={() => inputRef.current?.click()}
           >
-            {state.isParsing ? 'Обработка…' : 'Выбрать файл'}
+            {state.isParsing ? (
+              <span className={styles.loadingRow}>
+                <span className={styles.spinner} aria-hidden />
+                Обработка…
+              </span>
+            ) : (
+              'Выбрать файл'
+            )}
           </button>
         </div>
         <input
@@ -81,21 +95,22 @@ export function FileUploader() {
       </div>
 
       <div className={styles.panel}>
-        <h2 className={styles.panelTitle}>Как выбрать свой номер</h2>
-        <ol className={styles.list}>
-          <li>После загрузки проверьте отчёт о распознавании колонок.</li>
-          <li>
-            Приложение предложит номер из шапки файла или первой корректной
-            строки — подтвердите ФИО.
-          </li>
-          <li>При необходимости введите другой номер вручную.</li>
-          <li>Автоматически считать первую строку владельцем без подтверждения нельзя.</li>
+        <h2 className={styles.blockTitle}>Как начать</h2>
+        <ol className={styles.steps}>
+          <li>Загрузите информационный листок Excel.</li>
+          <li>Проверьте, что колонки распознаны корректно.</li>
+          <li>Подтвердите свой номер партнёра по ФИО.</li>
+          <li>Изучайте обзор, поиск и структуру команды.</li>
         </ol>
       </div>
 
       {state.importError ? (
         <div className={`${styles.alert} ${styles.alertError}`} role="alert">
           {state.importError}
+          <div style={{ marginTop: 8 }}>
+            Выберите другой файл или проверьте, что это информационный листок
+            Oriflame.
+          </div>
         </div>
       ) : null}
     </section>

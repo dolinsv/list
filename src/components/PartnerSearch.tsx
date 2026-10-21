@@ -1,18 +1,41 @@
-import { useDeferredValue, useMemo, useState } from 'react';
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { Search } from 'lucide-react';
 import styles from '../styles/app.module.css';
 import { useSession } from '../context/SessionContext';
 import { searchPartners } from '../features/partners/searchPartners';
 import { PartnerTable } from './PartnerTable';
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 40;
 
 export function PartnerSearch() {
-  const { state, selectPartner } = useSession();
+  const { state, selectPartner, clearPartnersFocus } = useSession();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [hasContacts, setHasContacts] = useState<'any' | 'yes' | 'no'>('any');
   const [minPersonalBB, setMinPersonalBB] = useState('');
   const [page, setPage] = useState(0);
   const deferredQuery = useDeferredValue(query);
+
+  useEffect(() => {
+    const intent = state.partnersIntent;
+    if (intent.minPersonalBB != null) {
+      setMinPersonalBB(intent.minPersonalBB);
+      setPage(0);
+    }
+    if (intent.focusToken > 0) {
+      window.requestAnimationFrame(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      });
+      clearPartnersFocus();
+    }
+  }, [state.partnersIntent, clearPartnersFocus]);
 
   const hits = useMemo(() => {
     const partners = state.report?.partners ?? [];
@@ -32,87 +55,114 @@ export function PartnerSearch() {
   );
 
   return (
-    <section className={styles.panel}>
-      <h2 className={styles.panelTitle}>Партнёры</h2>
-      <p className={styles.panelLead}>
-        Поиск по номеру и ФИО выполняется только в памяти браузера. Запрос не
-        попадает в адресную строку.
-      </p>
-
-      <div className={styles.row}>
-        <div className={styles.field} style={{ flex: 1, minWidth: 220 }}>
-          <label htmlFor="partner-query">Номер или ФИО</label>
-          <input
-            id="partner-query"
-            className={styles.input}
-            value={query}
-            autoComplete="off"
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setPage(0);
-            }}
-            placeholder="Например, 3270 или Иванова"
-          />
-        </div>
-        <div className={styles.field}>
-          <label htmlFor="contacts-filter">Контакты</label>
-          <select
-            id="contacts-filter"
-            className={styles.input}
-            value={hasContacts}
-            onChange={(e) => {
-              setHasContacts(e.target.value as 'any' | 'yes' | 'no');
-              setPage(0);
-            }}
-          >
-            <option value="any">Любые</option>
-            <option value="yes">Есть телефон или email</option>
-            <option value="no">Без контактов</option>
-          </select>
-        </div>
-        <div className={styles.field}>
-          <label htmlFor="min-bb">Мин. личные ББ</label>
-          <input
-            id="min-bb"
-            className={styles.input}
-            inputMode="numeric"
-            value={minPersonalBB}
-            onChange={(e) => {
-              setMinPersonalBB(e.target.value.replace(/[^\d]/g, ''));
-              setPage(0);
-            }}
-            placeholder="0"
-          />
-        </div>
+    <section className={styles.stack}>
+      <div>
+        <p className={styles.sectionLead} style={{ marginBottom: 0 }}>
+          Найдите человека по номеру или ФИО. Поиск выполняется только в памяти
+          браузера.
+        </p>
       </div>
 
-      <p className={styles.muted}>Найдено: {hits.length}</p>
+      <div className={styles.panel}>
+        <div className={styles.filtersRow}>
+          <div className={styles.field}>
+            <label htmlFor="partner-query">Поиск</label>
+            <div className={styles.searchField}>
+              <Search size={16} strokeWidth={2} aria-hidden />
+              <input
+                ref={inputRef}
+                id="partner-query"
+                className={styles.input}
+                value={query}
+                autoComplete="off"
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setPage(0);
+                }}
+                placeholder="Номер или фамилия…"
+              />
+            </div>
+          </div>
+          <div className={styles.field}>
+            <label htmlFor="contacts-filter">Контакты</label>
+            <select
+              id="contacts-filter"
+              className={`${styles.input} ${styles.select}`}
+              value={hasContacts}
+              onChange={(e) => {
+                setHasContacts(e.target.value as 'any' | 'yes' | 'no');
+                setPage(0);
+              }}
+            >
+              <option value="any">Все</option>
+              <option value="yes">Есть телефон или email</option>
+              <option value="no">Без контактов</option>
+            </select>
+          </div>
+          <div className={styles.field}>
+            <label htmlFor="min-bb">Мин. личные ББ</label>
+            <input
+              id="min-bb"
+              className={styles.input}
+              inputMode="numeric"
+              value={minPersonalBB}
+              onChange={(e) => {
+                setMinPersonalBB(e.target.value.replace(/[^\d]/g, ''));
+                setPage(0);
+              }}
+              placeholder="Любые"
+            />
+          </div>
+        </div>
 
-      <PartnerTable
-        hits={pageHits}
-        onSelect={(number) => selectPartner(number)}
-      />
+        <div className={styles.resultMeta}>
+          <span className={styles.muted}>
+            Найдено: <strong>{hits.length}</strong>
+          </span>
+          {(query || hasContacts !== 'any' || minPersonalBB) && (
+            <button
+              type="button"
+              className={styles.btnGhost}
+              onClick={() => {
+                setQuery('');
+                setHasContacts('any');
+                setMinPersonalBB('');
+                setPage(0);
+              }}
+            >
+              Сбросить фильтры
+            </button>
+          )}
+        </div>
 
-      <div className={styles.pager}>
-        <button
-          type="button"
-          className={styles.btnGhost}
-          disabled={safePage <= 0}
-          onClick={() => setPage((p) => Math.max(0, p - 1))}
-        >
-          Назад
-        </button>
-        <span className={styles.muted}>
-          Страница {safePage + 1} из {pageCount}
-        </span>
-        <button
-          type="button"
-          className={styles.btnGhost}
-          disabled={safePage >= pageCount - 1}
-          onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-        >
-          Вперёд
-        </button>
+        <PartnerTable
+          hits={pageHits}
+          onSelect={(number) => selectPartner(number, 'partners')}
+        />
+
+        {hits.length > PAGE_SIZE ? (
+          <div className={styles.pager}>
+            <button
+              type="button"
+              className={styles.btn}
+              disabled={safePage <= 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+            >
+              Назад
+            </button>
+            <span className={styles.muted}>
+              Страница {safePage + 1} из {pageCount}
+            </span>
+            <button
+              type="button"
+              className={styles.btn}
+              disabled={safePage >= pageCount - 1}
+              onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+            >
+              Вперёд
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
