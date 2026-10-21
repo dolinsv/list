@@ -196,13 +196,10 @@ export function PartnerCard() {
         </div>
       </section>
 
-      <section className={styles.metricsGrid}>
-        <MetricCard label="Личные ББ" value={partner.personalBB} />
-        <MetricCard label="ББ в ПГ" value={partner.groupBB} />
-        <MetricCard label="%" value={partner.percent} />
-        {partner.beautyBB != null && partner.beautyBB !== 0 ? (
-          <MetricCard label="ББ Бьюти" value={partner.beautyBB} />
-        ) : null}
+      <section className={styles.metricsRow}>
+        <MetricCard label="Личные ББ" value={partner.personalBB} keepSlot />
+        <MetricCard label="ББ в ПГ" value={partner.groupBB} keepSlot />
+        <MetricCard label="%" value={partner.percent} keepSlot />
       </section>
 
       {(partner.phone || partner.email) && (

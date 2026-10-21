@@ -28,19 +28,15 @@ export function FileUploader() {
 
   return (
     <section className={styles.hero}>
-      <div>
-        <h1 className={styles.heroBrand}>Анализ структуры Oriflame</h1>
-        <p className={styles.heroText}>
-          Загрузите информационный листок — приложение разберёт его локально и
-          поможет понять вашу команду: поиск, структура и показатели без отправки
-          данных на сервер.
-        </p>
-      </div>
+      <h1 className={styles.heroBrand}>Анализ структуры Oriflame</h1>
 
-      <div className={styles.privacyNote}>
-        <strong>Приватность.</strong> Файл читается только в браузере. Отчёт не
-        сохраняется и не уходит во внешние сервисы. После очистки или
-        перезагрузки данные исчезают.
+      <div className={styles.panel}>
+        <h2 className={styles.blockTitle}>Как начать</h2>
+        <ol className={styles.steps}>
+          <li>Загрузите информационный листок Excel.</li>
+          <li>Проверьте, что колонки распознаны корректно.</li>
+          <li>Изучайте обзор, поиск и структуру команды.</li>
+        </ol>
       </div>
 
       <div
@@ -94,14 +90,10 @@ export function FileUploader() {
         />
       </div>
 
-      <div className={styles.panel}>
-        <h2 className={styles.blockTitle}>Как начать</h2>
-        <ol className={styles.steps}>
-          <li>Загрузите информационный листок Excel.</li>
-          <li>Проверьте, что колонки распознаны корректно.</li>
-          <li>Подтвердите свой номер партнёра по ФИО.</li>
-          <li>Изучайте обзор, поиск и структуру команды.</li>
-        </ol>
+      <div className={styles.privacyNote}>
+        <strong>Приватность.</strong> Файл читается только в браузере. Отчёт не
+        сохраняется и не уходит во внешние сервисы. После очистки или
+        перезагрузки данные исчезают.
       </div>
 
       {state.importError ? (

@@ -6,10 +6,12 @@ type Props = {
   label: string;
   value: number | null;
   hint?: string;
+  /** Показывать карточку даже без значения (для ровной сетки) */
+  keepSlot?: boolean;
 };
 
-export function MetricCard({ label, value, hint }: Props) {
-  if (value === null) return null;
+export function MetricCard({ label, value, hint, keepSlot = false }: Props) {
+  if (value === null && !keepSlot) return null;
 
   return (
     <article className={styles.metricCard}>

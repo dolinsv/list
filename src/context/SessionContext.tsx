@@ -61,13 +61,29 @@ function reducer(state: SessionState, action: Action): SessionState {
         ...initialState,
         isParsing: true,
       };
-    case 'PARSE_SUCCESS':
+    case 'PARSE_SUCCESS': {
+      const firstNumber =
+        action.report.partners.find((p) => p.partnerNumber)?.partnerNumber ??
+        null;
+      if (!action.report.validation.ok || !firstNumber) {
+        return {
+          ...initialState,
+          importError:
+            action.report.validation.criticalErrors[0] ??
+            'В файле не удалось определить партнёров.',
+          isParsing: false,
+        };
+      }
       return {
         ...initialState,
-        view: 'import',
+        view: 'dashboard',
+        tab: 'overview',
         report: action.report,
+        rootPartnerNumber: firstNumber,
+        selectedPartnerNumber: firstNumber,
         isParsing: false,
       };
+    }
     case 'PARSE_ERROR':
       return {
         ...initialState,
