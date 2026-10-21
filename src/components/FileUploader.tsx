@@ -38,6 +38,23 @@ export function FileUploader() {
         </ol>
       </div>
 
+      <div className={styles.panel}>
+        <h2 className={styles.blockTitle}>Как установить</h2>
+        <ul className={styles.steps} style={{ listStyle: 'disc' }}>
+          <li>
+            <strong>iPhone:</strong> Safari → «Поделиться» → «На экран „Домой“»
+          </li>
+          <li>
+            <strong>Android:</strong> Chrome → меню ⋮ → «Установить приложение» /
+            «На главный экран»
+          </li>
+          <li>
+            <strong>ПК:</strong> Chrome или Edge → иконка установки в адресной
+            строке
+          </li>
+        </ul>
+      </div>
+
       <div
         className={`${styles.dropzone} ${dragOver ? styles.dropzoneActive : ''}`}
         onDragEnter={(e) => {
